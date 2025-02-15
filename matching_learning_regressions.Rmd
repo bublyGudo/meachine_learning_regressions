@@ -1,0 +1,79 @@
+---
+title: "matchine_learning_regressions"
+author: "Fang Wang"
+date: "2025-02-15"
+output: github_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Libraries
+```{r library}
+library(caret)
+library(glmnet)
+library(tidyverse)
+```
+
+# Set working directory
+```{r wd}
+setwd("/Users/fangwang/Downloads/Data Science II/Data Science II_homework1/meachine_learning_regressions")
+```
+
+# Data
+```{r data}
+training_data = read.csv("./housing_training.csv") |> 
+  janitor::clean_names()
+testing_data = read.csv("./housing_test.csv") |> 
+  janitor::clean_names()
+```
+
+# (a) Lasso
+
+## fit a lasso model using training data
+```{r lasso}
+ctrl1 = trainControl(method = "cv", number = 10)
+set.seed(0215)
+lasso_fit = train(sale_price ~.,
+                  data = training_data,
+                  method = "glmnet",
+                  tuneGrid = expand.grid(alpha =1,
+                                         lambda = exp (seq(6,0,length=100))),
+                  trControl = ctrl1)
+```
+
+## find best fit
+```{r fit}
+plot(lasso_fit, xTrans = log)
+lasso_fit$bestTune
+coef(lasso_fit$finalModel, lasso_fit$bestTune$lambda)
+```
+
+# (b) Elastic Net
+## fit an elastic net model using training data
+```{r enet}
+set.seed(0215)
+enet_fit = train(sale_price ~ .,
+                 data = training_data,
+                 method = "glmnet",
+                 tuneGrid = expand.grid(alpha = seq(0,1, length =21,),
+                                        lambda = exp(seq(6,0, length = 100))),
+                 trControl = ctrl1)
+```
+
+## find best fit
+```{r bestfit}
+color = rainbow(25)
+par = list (superpose.symbol = list (col=color),
+            superpose.line = list (col = color))
+
+plot(enet_fit, par.settings = par, xTrans = log)
+coef(enet_fit$finalModel, enet_fit$bestTune$lambda)
+```
+
+# (c) Partial Least Squares Model
+## fit a partial leaset squares model using training data
+```{r pls}
+
+```
+
+
